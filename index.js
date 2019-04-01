@@ -4,12 +4,47 @@ const path = require('path');
 
 
 
+
+var ArgumentParser = require('argparse').ArgumentParser;
+var parser = new ArgumentParser({
+  version: '0.0.1',
+  addHelp:true,
+  description: 'Argparse example'
+});
+parser.addArgument(
+  [ '-l', '--list' ],
+  {
+    help: 'List'
+  }
+);
+parser.addArgument(
+  [ '-u', '--upload' ],
+  {
+    help: 'Upload <file>'
+  }
+);
+parser.addArgument(
+  [ '-d', '--delete' ],
+
+  {
+    help: 'Delete <regexp>'
+  }
+);
+const args = parser.parseArgs();
+
 const filePath = "./data/file.txt";
-const params = {
-  Bucket: 'lcloud-427-ag',
-  Body: fs.createReadStream(filePath),
-  Key: "folder/" + Date.now() + "_" + path.basename(filePath)
-};
+
+let params = null;
+
+if(args.upload) {
+  params = {
+    Bucket: 'lcloud-427-ag',
+    Body: fs.createReadStream(args.upload),
+    Key: args.upload
+  };
+  
+}
+
 const s3 = new AWS.S3({
   region: 'eu-central-1',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -17,7 +52,27 @@ const s3 = new AWS.S3({
 });
 
 
+  if(args.list) {
+    listAllObjectsFromS3Bucket('lcloud-427-ag',null).then().catch(e=>{
+      console.log(error);
+    });    
+    console.log('asas');
+   } else if(args.upload) {
 
+  s3.upload(params, (err, data) => {
+  if (err) {
+    console.log("Error", err);
+    return;
+  }
+  if (data) {
+    console.log("Uploaded in:", data.Location);
+  }
+});
+
+
+  } else if(args.delete) {
+    listAllObjectsFromS3Bucket('lcloud-427-ag', null, new RegExp(args.delete), deleteFile)
+  }
 
 async function listAllObjectsFromS3Bucket(bucket, prefix, filter = /.*/, command = (item) => {}) {
   let isTruncated = true;
@@ -59,28 +114,6 @@ async function listAllObjectsFromS3Bucket(bucket, prefix, filter = /.*/, command
     }
   }
 }
-
-
-
-s3.upload(params, (err, data) => {
-  if (err) {
-    console.log("Error", err);
-    return;
-  }
-  if (data) {
-    console.log("Uploaded in:", data.Location);
-  }
-});
-
-
-
-listAllObjectsFromS3Bucket('lcloud-427-ag',null).then(
-()=>{
-  listAllObjectsFromS3Bucket('lcloud-427-ag', null, /11/, deleteFile);
-}
-
-);
-
 
 
 
