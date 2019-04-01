@@ -74,10 +74,15 @@ s3.upload(params, (err, data) => {
 
 
 
-listAllObjectsFromS3Bucket('lcloud-427-ag',null);
+listAllObjectsFromS3Bucket('lcloud-427-ag',null).then(
+()=>{
+  listAllObjectsFromS3Bucket('lcloud-427-ag', null, /11/, deleteFile);
+}
+
+);
 
 
-listAllObjectsFromS3Bucket('lcloud-427-ag', null, /11/, deleteFile);
+
 
 function deleteFile(item) {
   const params = {
