@@ -1,30 +1,26 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
-const path = require('path');
 
 
 
-
-var ArgumentParser = require('argparse').ArgumentParser;
-var parser = new ArgumentParser({
+const ArgumentParser = require('argparse').ArgumentParser;
+const parser = new ArgumentParser({
   version: '0.0.1',
-  addHelp:true,
+  addHelp: true,
   description: 'Argparse example'
 });
 parser.addArgument(
-  [ '-l', '--list' ],
-  {
+  ['-l', '--list'], {
     help: 'List'
   }
 );
 parser.addArgument(
-  [ '-u', '--upload' ],
-  {
+  ['-u', '--upload'], {
     help: 'Upload <file>'
   }
 );
 parser.addArgument(
-  [ '-d', '--delete' ],
+  ['-d', '--delete'],
 
   {
     help: 'Delete <regexp>'
@@ -32,17 +28,16 @@ parser.addArgument(
 );
 const args = parser.parseArgs();
 
-const filePath = "./data/file.txt";
 
 let params = null;
 
-if(args.upload) {
+if (args.upload) {
   params = {
     Bucket: 'lcloud-427-ag',
     Body: fs.createReadStream(args.upload),
     Key: args.upload
   };
-  
+
 }
 
 const s3 = new AWS.S3({
@@ -52,33 +47,33 @@ const s3 = new AWS.S3({
 });
 
 
-  if(args.list) {
-    listAllObjectsFromS3Bucket('lcloud-427-ag',null).then().catch(e=>{
-      console.log(error);
-    });    
-    console.log('asas');
-   } else if(args.upload) {
+if (args.list) {
+  listAllObjectsFromS3Bucket('lcloud-427-ag', null).then().catch(e => {
+    console.log(error);
+  });
+  console.log('asas');
+} else if (args.upload) {
 
   s3.upload(params, (err, data) => {
-  if (err) {
-    console.log("Error", err);
-    return;
-  }
-  if (data) {
-    console.log("Uploaded in:", data.Location);
-  }
-});
+    if (err) {
+      console.log("Error", err);
+      return;
+    }
+    if (data) {
+      console.log("Uploaded in:", data.Location);
+    }
+  });
 
 
-  } else if(args.delete) {
-    listAllObjectsFromS3Bucket('lcloud-427-ag', null, new RegExp(args.delete), deleteFile)
-  }
+} else if (args.delete) {
+  listAllObjectsFromS3Bucket('lcloud-427-ag', null, new RegExp(args.delete), deleteFile)
+}
 
 async function listAllObjectsFromS3Bucket(bucket, prefix, filter = /.*/, command = (item) => {}) {
   let isTruncated = true;
   let marker;
 
-  
+
   while (isTruncated) {
 
     let params = {
